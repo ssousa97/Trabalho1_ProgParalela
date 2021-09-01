@@ -11,6 +11,8 @@ int main(int argc, char **argv){
     /*Inicializa o array de elementos com a quantidade de itens passados*/
     int n = atoi(argv[1]);
     int *original_array = malloc(n * sizeof(int));
+
+    double tempo_inicial, tempo_final;
     
     srand(time(NULL));
 
@@ -21,15 +23,17 @@ int main(int argc, char **argv){
     int rank;
     int processes;
 
-    MPI_INIT(&argc, &argv);
+    MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
 
     /*Tamanho do bloco que será alocado para cada processo*/
     int size = n / processes;
 
-    /*Enviaa os sub-arrays com tamanho size para cada processo*/
+    /*Envia os sub-arrays com tamanho size para cada processo*/
     int *sub_array = malloc(size * sizeof(int));
+    tempo_inicial = MPI_Wtime();
+
     MPI_Scatter(original_array, size, MPI_INT, sub_array, size, MPI_INT, 0, MPI_COMM_WORLD);
 
     /*Executa o mergeSort no bloco do array*/
@@ -50,9 +54,13 @@ int main(int argc, char **argv){
         int *other_array = malloc(n * sizeof(int));
         mergeSort(sorted, other_array, 0, (n - 1));
 
-        printf("Array ordenado: ");
-        for (int i = 0; i < n; i++)
-            printf("%d ", sorted[i]);
+        tempo_final = MPI_Wtime();
+        // printf("Array ordenado: ");
+        // for (int i = 0; i < n; i++)
+        //     printf("%d ", sorted[i]);
+
+        printf("\n");
+        printf("Array ordenado em : %3.1f segundos\n", tempo_final - tempo_inicial);
 
         free(sorted);
         free(other_array);
