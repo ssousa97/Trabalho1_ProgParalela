@@ -61,7 +61,7 @@ int main(int argc, char **argv){
     MPI_Status istatus;
     FILE *infile;
 
-    infile = fopen("./aux/dados", "r");
+    infile = fopen("../aux/dados", "r");
     if (infile == NULL)
         printf("error opening file\n");
 
