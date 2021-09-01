@@ -5,23 +5,14 @@
 int main(int argc, char *argv[]) {
 
     int meu_ranque, num_procs, raiz = 0;
-    int n = 1000000000;
+    long int n = 1000000000;
     double t0, t1, global_pi, local_pi = 0;
 
-    // Setting variables passed during program calling.
-    for (int i = 0; i < argc; i++) {
-        switch (argv[i][0]) {
-            case '-':
-                switch (argv[i][1]) {
-                    case 'n':
-                        n = atoi(argv[i+1]);
-                        i++;
-                    default:
-                        continue;
-                }
-            default:
-                continue;
-        }
+    if (argc < 2) {
+        	printf("Valor inválido! Entre com um valor para o parâmetro N\n");
+       	 	return 0;
+    } else {
+        n = strtol(argv[1], (char **) NULL, 10);
     }
 
     MPI_Init(&argc, &argv);
@@ -32,7 +23,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &meu_ranque);
 
     if (meu_ranque == raiz) {
-        printf("n = %d \n", n);
+        printf("n = %ld \n", n);
     }
 
     for (int i = meu_ranque; i < n; i += num_procs) {
