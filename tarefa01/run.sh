@@ -3,7 +3,7 @@ N_values="1000000000 10000000000 100000000000"
 num_procs="1 2 4 8 12 16"
 programs="pi_monteCarlo_paralelo pi_trapezio_paralelo"
 
-num_experiments=$(($(wc -w <<< ${N_values})*$(wc -w <<< ${num_procs})))
+num_experiments=$(($(wc -w <<< ${N_values})*$(wc -w <<< ${num_procs})*$(wc -w <<< ${programs})))
 cur_experiment=1
 
 # Definindo algumas constantes
