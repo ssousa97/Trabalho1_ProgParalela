@@ -4,8 +4,8 @@ num_procs=("1" "2" "4" "8" "16" "32" "64" "128")
 programs="mpi_primos mpi_primosbag"
 
 # Definindo algumas constantes
-PBS_SCRIPTS_DIR=".pbs-scripts"
-JOBS_RESULTS_DIR=".jobs-results"
+PBS_SCRIPTS_DIR="./pbs-scripts"
+JOBS_RESULTS_DIR="./jobs-results"
 
 # Removendo diretorios de execucoes anteriores
 rm -r ${PBS_SCRIPTS_DIR}
