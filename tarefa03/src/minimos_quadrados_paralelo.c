@@ -49,6 +49,7 @@ int main(int argc, char **argv){
     double mySUMx, mySUMy, mySUMxy, mySUMxx, SUMx, SUMy, SUMxy,
         SUMxx, SUMres, res, slope, y_intercept, y_estimate;
     int i, j, n, myid, numprocs, naverage, nremain, mypoints, ishift;
+    double tempo_inicial, tempo_final;
 
 
     /*MPI_REQUEST usado na comunicação não-bloqueante*/
@@ -61,7 +62,9 @@ int main(int argc, char **argv){
     MPI_Status istatus;
     FILE *infile;
 
-    infile = fopen("../aux/dados", "r");
+    char *filepath = argv[1];
+
+    infile = fopen(filepath, "r");
     if (infile == NULL)
         printf("error opening file\n");
 
@@ -72,22 +75,31 @@ int main(int argc, char **argv){
     /* ----------------------------------------------------------
    * Step 1: Process 0 reads data and sends the value of n
    * ---------------------------------------------------------- */
-    x = (double *)malloc(n * sizeof(double));
-    y = (double *)malloc(n * sizeof(double));
 
     if (myid == root){
         printf("Number of processes used: %d\n", numprocs);
-        printf("-------------------------------------\n");
-        printf("The x coordinates on worker processes:\n");
+        //printf("-------------------------------------\n");
+        //printf("The x coordinates on worker processes:\n");
         /* this call is used to achieve a consistent output format */
         /* new_sleep (3);*/
         fscanf(infile, "%d", &n);
         
+        x = (double *)malloc(n * sizeof(double));
+        y = (double *)malloc(n * sizeof(double));
+
         for (i = 0; i < n; i++)
             fscanf(infile, "%lf %lf", &x[i], &y[i]);
+
+        tempo_final = MPI_Wtime();
     }
+
     /*Processo raiz 0, envia dados de 'n' para todos os outros processos através de comunicação coletiva.*/
     MPI_Bcast(&n, 1, MPI_INT, root, MPI_COMM_WORLD);
+
+    if (myid != root) {
+        x = (double *)malloc(n * sizeof(double));
+        y = (double *)malloc(n * sizeof(double));
+    }
 
     naverage = n / numprocs;
     nremain = n % numprocs;
@@ -109,24 +121,26 @@ int main(int argc, char **argv){
         }
     }
     else
-    {
+    { 
         /* ---------------the other processes receive---------------- */
         MPI_Irecv(&ishift, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &request1);
         MPI_Wait(&request1, &istatus);
 
         MPI_Irecv(&mypoints, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &request2);   
         MPI_Wait(&request2, &istatus);
-        
+
         MPI_Irecv(&x[ishift], mypoints, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD, &request3);
         MPI_Wait(&request3, &istatus);
 
+
         MPI_Irecv(&y[ishift], mypoints, MPI_DOUBLE, 0, 4, MPI_COMM_WORLD, &request4);
         MPI_Wait(&request4, &istatus);
-        
+        /*
         printf("id %d: ", myid);
         for (i = 0; i < n; i++)
             printf("%4.2lf ", x[i]);
         printf("\n");
+        */
         /* ---------------------------------------------------------- */
     }
 
@@ -142,7 +156,8 @@ int main(int argc, char **argv){
         ishift = 0;
         mypoints = naverage;
     }
-    for (j = 0; j < mypoints; j++)
+
+for (j = 0; j < mypoints; j++)
     {
         mySUMx = mySUMx + x[ishift + j];
         mySUMy = mySUMy + y[ishift + j];
@@ -193,11 +208,15 @@ int main(int argc, char **argv){
     {
         slope = (SUMx * SUMy - n * SUMxy) / (SUMx * SUMx - n * SUMxx);
         y_intercept = (SUMy - slope * SUMx) / n;
+
+        tempo_final = MPI_Wtime();
+
         /* this call is used to achieve a consistent output format */
         /*new_sleep (3);*/
-        printf("\n");
+        //printf("\n");
         printf("The linear equation that best fits the given data:\n");
         printf("       y = %6.2lfx + %6.2lf\n", slope, y_intercept);
+        /*
         printf("--------------------------------------------------\n");
         printf("   Original (x,y)     Estimated y     Residual\n");
         printf("--------------------------------------------------\n");
@@ -213,6 +232,8 @@ int main(int argc, char **argv){
         }
         printf("--------------------------------------------------\n");
         printf("Residual sum = %6.2lf\n", SUMres);
+        */
+        printf("The program executed in %.4f seconds.\n", tempo_final-tempo_inicial);
     }
 
     /* ----------------------------------------------------------	*/

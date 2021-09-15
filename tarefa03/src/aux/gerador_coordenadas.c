@@ -9,16 +9,17 @@ double fRand(double fMin, double fMax)
     return fMin + f * (fMax - fMin);
 }
 
-int main(){
+int main(int argc, char **argv){
 
     double y;
 
     int x = 0;
-    int qtd_coordenadas = 10;
+    int qtd_coordenadas = atoi(argv[1]);
+    char *filepath = argv[2];
 
     srand(time(NULL));
 
-    FILE *file = fopen("./dados.txt","w+");
+    FILE *file = fopen(filepath,"w+");
 
     fprintf(file, "%d\n", qtd_coordenadas);
 
